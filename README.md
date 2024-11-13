@@ -5,8 +5,8 @@
 
  ## Reduce Barrier of Adoption with Low-Code: End-to-End GenAI App Development for Productivity
  
-  **🌟Key Highlights**
- - 🛠️ Build & configure GenAI applications rapidly with low-code with no setup hassle
+  **🌟Key Capabilities**
+ - 🛠️ Build & configure GenAI applications rapidly with low-code and no setup hassle
  - 🔍 Instant evaluation with sandbox on Kubernetes Namespace
  - 📊 Dynamic performance measurement & benchmarking with Grafana dashboarding via Prometheus
  - ⚙️ One-click deployment package generation for instant application setup
@@ -73,7 +73,7 @@ OS: Linux Debian-based distribution
 _Note: This setup has been validated on a system running Ubuntu 22.04 on an Intel(R) Xeon(R) Platinum 8468 server with 1000GB memory and 300GB local storage._
 
 ### Prerequisites
-GenAIStudio requires an on-premise Kubernetes cluster. If your server does not have Kubernetes set up, please install by following the [Kubernetes official setup guide](https://kubernetes.io/docs/setup/). Alternatively, you can try out our [setup onpremise kubernetes script](./setup-scripts/setup-onpremise-kubernetes/readme.md).
+GenAIStudio requires an on-premise Kubernetes cluster. If your server does not have Kubernetes set up, please install and setup `kubectl` from the official [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/). Alternatively, you can try out our [setup script](./setup-scripts/setup-onpremise-kubernetes/readme.md).
 
 ### Installation
 The installation is done using genai-studio-playbook script. The script will
@@ -94,7 +94,7 @@ The installation can be done with the following steps:
 	cd setup-scripts/setup-genai-studio
 	ansible-playbook genai-studio-playbook.yml
 	```
-	_Note: you can review the deployment configurations in [genai-studio-playbook.yml](https://github.com/opea-project/GenAIStudio/blob/main/setup-scripts/setup-genai-studio/genai-studio-playbook.yml)_
+	_Note: you can review the deployment configurations in [genai-studio-playbook.yml](./setup-scripts/setup-genai-studio/genai-studio-playbook.yml)_
 	
 
 ## Getting Started with GenAIStudio 
@@ -116,7 +116,7 @@ You can access the the Studio UI in a web browser at `http://<studio_server_ip>:
 
 3. **Configure and connect microservice nodes:** 
 
-	Some nodes have configurable parameters that let you set specific settings. After configuring a node, you can connect it to another node by dragging the output edge and dropping it onto the input edge of the target node. Once your workflow is complete, click the 💾 **Save Workflow** button to save your project.
+	Some nodes have configurable parameters that let you set specific settings. After configuring a node, you can connect it to another node by dragging the output edge and dropping it onto the input edge of the target node. Once your workflow is complete, click the 💾 **Save OpeaFlow** button to save your project.
 
 	![start_new_project_3](./assets/screenshots/start_new_project_3.png)
 
