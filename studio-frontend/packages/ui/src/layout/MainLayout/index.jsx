@@ -12,7 +12,7 @@ import Sidebar from './Sidebar'
 import { drawerWidth, headerHeight } from '@/store/constant'
 import { SET_MENU } from '@/store/actions'
 
-import {useKeycloak } from '../../KeycloakContext.jsx'
+// import {useKeycloak } from '../../KeycloakContext.jsx'
 
 // styles
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
@@ -59,9 +59,10 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
 // ==============================|| MAIN LAYOUT ||============================== //
 
 const MainLayout = () => {
-    const keycloak = useKeycloak()
-    console.log ("login roles", keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0])
-    let userRole = keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0]
+    // const keycloak = useKeycloak()
+    // console.log ("login roles", keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0])
+    // let userRole = keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0]
+    let userRole = "admin"
 
     const handleLogout = () => {
         keycloak.logout({

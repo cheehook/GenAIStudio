@@ -56,7 +56,7 @@ import { usePrompt } from '@/utils/usePrompt'
 import { FLOWISE_CREDENTIAL_ID } from '@/store/constant'
 
 // keycloak context
-import { useKeycloak } from '../../KeycloakContext'
+// import { useKeycloak } from '../../KeycloakContext'
 
 const nodeTypes = { customNode: CanvasNode, stickyNote: StickyNote }
 const edgeTypes = { buttonedge: ButtonEdge }
@@ -64,7 +64,7 @@ const edgeTypes = { buttonedge: ButtonEdge }
 // ==============================|| CANVAS ||============================== //
 
 const Canvas = () => {
-    const keycloak = useKeycloak()
+    // const keycloak = useKeycloak()
     const theme = useTheme()
     const navigate = useNavigate()
 
@@ -228,7 +228,7 @@ const Canvas = () => {
             const flowData = JSON.stringify(rfInstanceObject)
 
             console.log (chatflowName)
-            console.log (keycloak?.tokenParsed)    
+            // console.log (keycloak?.tokenParsed)    
 
             if (!chatflow.id) {
                 const newChatflowBody = {
@@ -236,7 +236,8 @@ const Canvas = () => {
                     deployed: false,
                     isPublic: false,
                     flowData,
-                    userid: keycloak?.tokenParsed?.email ? keycloak.tokenParsed.email : '',
+                    // userid: keycloak?.tokenParsed?.email ? keycloak.tokenParsed.email : '',
+                    userid: '',
                     type: isAgentCanvas ? 'MULTIAGENT' : isOpeaCanvas ? 'OPEA' : 'CHATFLOW'
                 }
                 createNewChatflowApi.request(newChatflowBody)

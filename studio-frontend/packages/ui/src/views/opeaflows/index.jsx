@@ -30,12 +30,12 @@ import { baseURL } from '@/store/constant'
 import { IconPlus, IconLayoutGrid, IconList } from '@tabler/icons-react'
 
 //keycloak
-import { useKeycloak } from '../../KeycloakContext'
+// import { useKeycloak } from '../../KeycloakContext'
 
 // ==============================|| OPEAFlows ||============================== //
 
 const Opeaflows = () => {
-    const keycloak = useKeycloak()
+    // const keycloak = useKeycloak()
     const navigate = useNavigate()
     const theme = useTheme()
 
@@ -46,21 +46,22 @@ const Opeaflows = () => {
     const [loginDialogOpen, setLoginDialogOpen] = useState(false)
     const [loginDialogProps, setLoginDialogProps] = useState({})
 
-    console.log ("roles", keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0])
-    let userRole = keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0]
+    // console.log ("roles", keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0])
+    // let userRole = keycloak?.tokenParsed?.resource_access?.genaistudio?.roles[0]
+    let userRole = "admin"
     let getAllOpeaflowsApi = null
-    if (keycloak.authenticated) {
+    // if (keycloak.authenticated) {
         getAllOpeaflowsApi = useApi(chatflowsApi.getAllOpeaflows)
 
         if (userRole === 'admin') {
             getAllOpeaflowsApi = useApi(chatflowsApi.getAllOpeaflows)
             }
-        else if (userRole === 'user') {
-            getAllOpeaflowsApi = useApi(() => chatflowsApi.getUserOpeaflows(keycloak.tokenParsed.email));
-            console.log("email", keycloak.tokenParsed.email)
-            console.log ("get user opeaflows", getAllOpeaflowsApi)
-        }
-    }
+        // else if (userRole === 'user') {
+        //     getAllOpeaflowsApi = useApi(() => chatflowsApi.getUserOpeaflows(keycloak.tokenParsed.email));
+        //     console.log("email", keycloak.tokenParsed.email)
+        //     console.log ("get user opeaflows", getAllOpeaflowsApi)
+        // }
+    // }
      
     const stopSandboxApi = chatflowsApi.stopSandbox
     const updateFlowToServerApi = chatflowsApi.updateChatflow
@@ -93,14 +94,14 @@ const Opeaflows = () => {
         navigate('/opeacanvas')
     }
 
-    const importSamples = () => {
-        setLoading(true);
-        chatflowsApi.importSampleChatflowsbyUserId(keycloak.tokenParsed.email).then(() => {
-            getAllOpeaflowsApi.request();
-        }).catch(() => {
-            setLoading(false);
-        });
-    }
+    // const importSamples = () => {
+    //     setLoading(true);
+    //     chatflowsApi.importSampleChatflowsbyUserId(keycloak.tokenParsed.email).then(() => {
+    //         getAllOpeaflowsApi.request();
+    //     }).catch(() => {
+    //         setLoading(false);
+    //     });
+    // }
     
     const goToCanvas = (selectedChatflow) => {
         navigate(`/opeacanvas/${selectedChatflow.id}`)
@@ -199,9 +200,9 @@ const Opeaflows = () => {
                         <StyledButton variant='contained' onClick={addNew} startIcon={<IconPlus />} sx={{ borderRadius: 2, height: 40, width: 250 }}>
                             Create New Workflow
                         </StyledButton>
-                        <StyledButton variant='contained' onClick={importSamples} startIcon={<IconPlus />} sx={{ borderRadius: 2, height: 40, width: 250 }}>
+                        {/* <StyledButton variant='contained' onClick={importSamples} startIcon={<IconPlus />} sx={{ borderRadius: 2, height: 40, width: 250 }}>
                             Import Sample Workflows
-                        </StyledButton>
+                        </StyledButton> */}
                     </Box>
                     {!view || view === 'card' ? (
                         <>

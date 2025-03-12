@@ -20,15 +20,15 @@ import { SET_DARKMODE } from '@/store/actions'
 
 // keycloak context
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useKeycloak } from '../../../KeycloakContext'
+// import { useKeycloak } from '../../../KeycloakContext'
 
 const LogoutButton = () => {
-    const keycloak = useKeycloak(); // Access the Keycloak instance
-
+    // const keycloak = useKeycloak(); // Access the Keycloak instance
+    
     const handleLogout = () => {
-        keycloak.logout({
-            redirectUri: window.location.origin, // Redirect to the home page or desired URL after logout
-        });
+        // keycloak.logout({
+        //     redirectUri: window.location.origin, // Redirect to the home page or desired URL after logout
+        // });
     };
 
     return (
