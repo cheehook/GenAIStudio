@@ -7,7 +7,7 @@ class OPEARedisRetreiver {
         this.version = 1.0
         this.type = 'SearchedDoc'
         this.icon = 'opea-icon-color.svg'
-        this.category = 'Retreiver'
+        this.category = 'Retriever'
         this.description = 'Redis Retreiver with Langchain'
         this.baseClasses = [this.type, 'RetrievalResponse', 'ChatCompletionRequest']
         this.tags = ['OPEA']
