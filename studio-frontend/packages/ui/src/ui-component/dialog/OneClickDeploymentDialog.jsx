@@ -79,6 +79,7 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm, depl
             wsInstance.onmessage = (event) => {
                 let data;
                 try { data = JSON.parse(event.data); } catch { return; }
+                console.log('WebSocket message:', data);
                 if (data.status === 'Done') {
                     setDeployStatus(['Success', ...(data.success || '').split(',').map(line => line.trim())]);
                     setDeploying(false);
@@ -93,8 +94,8 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm, depl
                     }
                     setDeployStatus(['Error', ...lines]);
                     setDeploying(false);
-                } else {
-                    setDeployStatus(['Info', 'Deploying...']);
+                } else if (data.status === 'In Progress') {
+                    setDeployStatus(['Info', data.nohup_out]);
                 }
             };
             wsInstance.onerror = () => {
@@ -111,11 +112,22 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm, depl
     const renderStatus = () => {
         if (!deployStatus) return null;
         const [statusType, ...lines] = deployStatus;
-        const color = statusType === 'Error' ? 'red' : statusType === 'Success' ? 'green' : 'primary.main';
+        let color = statusType === 'Error' ? 'red' : statusType === 'Success' ? 'green' : 'primary.main';
+        let displayLines = lines;
+        let effectiveStatusType = statusType;
+        if (statusType === 'Info') {
+            let flatLines = Array.isArray(lines[0]) ? lines[0] : lines;
+            // Check for error/fail in any line
+            if (flatLines.some(line => typeof line === 'string' && (/error|fail/i).test(line))) {
+                color = 'red';
+                effectiveStatusType = 'Error';
+            }
+            displayLines = flatLines;
+        }
         return (
             <Box sx={{ pt: 2, pb: 2, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    <Box sx={{ fontWeight: 600, fontSize: '1rem', color, mb: 1 }}>{statusType}</Box>
+                    <Box sx={{ fontWeight: 600, fontSize: '1rem', color, mb: 1 }}>{effectiveStatusType}</Box>
                     <Box
                         sx={{
                             display: 'flex',
@@ -133,7 +145,7 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm, depl
                     >
                         {deploying && <CircularProgress size={18} sx={{ mr: 1, mt: 0.5 }} />}
                         <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                            {lines.map((line, idx) => <div key={idx}>{line}</div>)}
+                            {displayLines.map((line, idx) => <div key={idx}>{line}</div>)}
                         </Box>
                     </Box>
                 </Box>

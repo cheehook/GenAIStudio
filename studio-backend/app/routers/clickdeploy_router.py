@@ -52,6 +52,10 @@ async def check_clickdeploy_status(websocket: WebSocket):
             json_lines = [line for line in out.strip().splitlines() if line.strip() and not line.strip().startswith('WARN')]
             out_filtered = '\n'.join(json_lines)
             
+            # Read nohup.out for progress logs (always fetch latest 10 lines)
+            _, stdout_nohup, _ = ssh.exec_command(f"cd {compose_dir} && tail -n 10 nohup.out")
+            nohup_out_lines = stdout_nohup.read().decode().splitlines()
+
             ssh.close()
             
             try:
@@ -77,17 +81,9 @@ async def check_clickdeploy_status(websocket: WebSocket):
                         return {"error": f"Failed to parse docker compose ps output: {line}\n{str(e)}"}
                 
                 if len(all_services) != int(num_services_str):
-                    # Read nohup.out for error logs
-                    ssh = paramiko.SSHClient()
-                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                    ssh.connect(remote_host, username=remote_user)
-                    _, stdout_nohup, _ = ssh.exec_command(f"cd {compose_dir} && tail -n 10 nohup.out")
-                    nohup_out_lines = stdout_nohup.read().decode().splitlines()
-                    ssh.close()
-
+                    # If error in nohup.out, return as error
                     if any("error" in line.lower() or "fail" in line.lower() for line in nohup_out_lines):
                         return {"error": nohup_out_lines}
-                    
                     else:
                         print(f"[DEBUG] Docker pulling images..")
                         return {
@@ -97,7 +93,8 @@ async def check_clickdeploy_status(websocket: WebSocket):
                             "services_exited": 0,
                             "services_defined": int(num_services_str),
                             "ps": all_services,
-                            "error": None
+                            "error": None,
+                            "nohup_out": nohup_out_lines
                         }
 
                 services_exited = sum(1 for s in all_services if isinstance(s, dict) and s.get("State", "") == "exited")
@@ -116,7 +113,8 @@ async def check_clickdeploy_status(websocket: WebSocket):
                     "services_exited": services_exited,
                     "services_defined": int(num_services_str),
                     "ps": all_services,
-                    "error": None
+                    "error": None,
+                    "nohup_out": nohup_out_lines
                 }
             except Exception as e:
                 return {"error": str(e)}
@@ -149,7 +147,8 @@ async def check_clickdeploy_status(websocket: WebSocket):
                     ]
                     await websocket.send_json({"status": "Error", "error": f"Services in exited state: [{', '.join(exited_services)}]"})
                 break
-            await websocket.send_json({"status": "In Progress", "ps": result["ps"]})
+            # Send nohup_out in progress status
+            await websocket.send_json({"status": "In Progress", "ps": result["ps"], "nohup_out": result.get("nohup_out", [])})
             time.sleep(2)
     except WebSocketDisconnect:
         print("Client disconnected")
