@@ -244,9 +244,30 @@ export const FlowListTable = ({ data, images, isLoading, filterFunction, updateF
     }
 
     const handleOneClickDeployment = (id) => {
-        setOneClickDeploymentDialogProps({ id })
-        setOneClickDeploymentDialogOpen(true)
-    }
+        // Reset dialog state if switching to a different row
+        if (oneClickDeploymentDialogProps.id !== id) {
+            setOneClickDeploymentDialogProps({});
+            setOneClickDeploymentDialogOpen(false);
+            setTimeout(() => {
+                setOneClickDeploymentDialogProps({ id });
+                setOneClickDeploymentDialogOpen(true);
+            }, 0);
+        } else {
+            setOneClickDeploymentDialogProps({ id });
+            setOneClickDeploymentDialogOpen(true);
+        }
+    };
+
+    const [deployStatusById, setDeployStatusById] = useState({});
+    const [deployConfigById, setDeployConfigById] = useState({});
+
+    const setDeployStatusForId = (id, status) => {
+        setDeployStatusById((prev) => ({ ...prev, [id]: status }));
+    };
+
+    const setDeployConfigForId = (id, config) => {
+        setDeployConfigById((prev) => ({ ...prev, [id]: config }));
+    };
 
     useEffect(() => {
         setSortedData(handleSortData());
@@ -670,10 +691,15 @@ export const FlowListTable = ({ data, images, isLoading, filterFunction, updateF
                 onConfirm={downloadDeploymentPackage}
             />
             <OneClickDeploymentDialog
+                key={oneClickDeploymentDialogProps.id || 'none'}
                 show={oneClickDeploymentDialogOpen}
                 dialogProps={oneClickDeploymentDialogProps}
                 onCancel={() => setOneClickDeploymentDialogOpen(false)}
                 onConfirm={oneClickDeployment}
+                deployStatus={deployStatusById[oneClickDeploymentDialogProps.id]}
+                setDeployStatus={(status) => setDeployStatusForId(oneClickDeploymentDialogProps.id, status)}
+                deploymentConfig={deployConfigById[oneClickDeploymentDialogProps.id] || { hostname: '', username: '' }}
+                setDeploymentConfig={(config) => setDeployConfigForId(oneClickDeploymentDialogProps.id, config)}
             />
         </>
     )

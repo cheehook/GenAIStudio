@@ -26,14 +26,12 @@ import {
 } from '@/store/actions';
 import chatflowsApi from '@/api/chatflows';
 
-const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm }) => {
+const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm, deployStatus, setDeployStatus, deploymentConfig, setDeploymentConfig }) => {
     const portalElement = document.getElementById('portal');
     const dispatch = useDispatch();
     const [pubkey, setPubkey] = useState('');
     const [copied, setCopied] = useState(false);
-    const [deploymentConfig, setDeploymentConfig] = useState({ hostname: '', username: '' });
     const [deploying, setDeploying] = useState(false);
-    const [deployStatus, setDeployStatus] = useState(null);
     const [ws, setWs] = useState(null);
 
     useEffect(() => {
@@ -63,23 +61,28 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm }) =>
 
     const handleOneClickDeploy = async () => {
         setDeploying(true);
-        setDeployStatus(['Info', 'Starting deployment...']);
+        setDeployStatus(['Info', 'Connecting to machine...']);
         try {
             const result = await onConfirm(dialogProps.id, deploymentConfig);
+            if (result && result.error) {
+                setDeployStatus(['Error', result.error]);
+                setDeploying(false);
+                return;
+            }
             const compose_dir = result?.compose_dir;
             const wsUrl = `${window.location.origin.replace(/^http/, 'ws')}/studio-backend/ws/clickdeploy-status`;
             const wsInstance = new window.WebSocket(wsUrl);
             setWs(wsInstance);
             wsInstance.onopen = () => {
-                wsInstance.send(JSON.stringify({ hostname: deploymentConfig.hostname, username: deploymentConfig.username, compose_dir }));
+                wsInstance.send(JSON.stringify({ hostname: deploymentConfig.hostname, username: deploymentConfig.username, compose_dir: compose_dir }));
             };
             wsInstance.onmessage = (event) => {
-                const data = JSON.parse(event.data)
+                let data;
+                try { data = JSON.parse(event.data); } catch { return; }
                 if (data.status === 'Done') {
-                    setDeployStatus(['Success', ...(data.success || '').split(',').map(line => line.trim())])
-                    setDeploying(false)
+                    setDeployStatus(['Success', ...(data.success || '').split(',').map(line => line.trim())]);
+                    setDeploying(false);
                 } else if (data.status === 'Error') {
-                    // console.log('Deployment error:', data.error)
                     let lines = [];
                     if (Array.isArray(data.error)) {
                         lines = data.error;
@@ -88,12 +91,12 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm }) =>
                     } else {
                         lines = ['Unknown error'];
                     }
-                    setDeployStatus(['Error', ...lines])
-                    setDeploying(false)
+                    setDeployStatus(['Error', ...lines]);
+                    setDeploying(false);
                 } else {
-                    setDeployStatus(['Info', 'Deploying...'])
+                    setDeployStatus(['Info', 'Deploying...']);
                 }
-            }
+            };
             wsInstance.onerror = () => {
                 setDeployStatus(['Error', 'WebSocket error']);
                 setDeploying(false);
@@ -109,7 +112,6 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm }) =>
         if (!deployStatus) return null;
         const [statusType, ...lines] = deployStatus;
         const color = statusType === 'Error' ? 'red' : statusType === 'Success' ? 'green' : 'primary.main';
-
         return (
             <Box sx={{ pt: 2, pb: 2, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
@@ -158,11 +160,11 @@ const OneClickDeploymentDialog = ({ show, dialogProps, onCancel, onConfirm }) =>
                 </Box>
                 <Box sx={{ pt: 2, pb: 2 }}>
                     <Typography sx={{ mb: 1 }}>Hostname <span style={{ color: 'red' }}>*</span></Typography>
-                    <OutlinedInput fullWidth value={deploymentConfig.hostname} onChange={e => setDeploymentConfig(dc => ({ ...dc, hostname: e.target.value }))} placeholder='Enter hostname' />
+                    <OutlinedInput fullWidth value={deploymentConfig.hostname} onChange={e => setDeploymentConfig({ ...deploymentConfig, hostname: e.target.value })} placeholder='Enter hostname' />
                 </Box>
                 <Box sx={{ pt: 2, pb: 2 }}>
                     <Typography sx={{ mb: 1 }}>Username <span style={{ color: 'red' }}>*</span></Typography>
-                    <OutlinedInput fullWidth value={deploymentConfig.username} onChange={e => setDeploymentConfig(dc => ({ ...dc, username: e.target.value }))} placeholder='Enter username' />
+                    <OutlinedInput fullWidth value={deploymentConfig.username} onChange={e => setDeploymentConfig({ ...deploymentConfig, username: e.target.value })} placeholder='Enter username' />
                 </Box>
                 {renderStatus()}
             </DialogContent>
@@ -182,7 +184,11 @@ OneClickDeploymentDialog.propTypes = {
     show: PropTypes.bool,
     dialogProps: PropTypes.object,
     onCancel: PropTypes.func,
-    onConfirm: PropTypes.func
+    onConfirm: PropTypes.func,
+    deployStatus: PropTypes.array,
+    setDeployStatus: PropTypes.func,
+    deploymentConfig: PropTypes.object,
+    setDeploymentConfig: PropTypes.func
 };
 
 export default OneClickDeploymentDialog;
